@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -15,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 /**
@@ -32,7 +32,8 @@ public class DatabasePopulateConfigurationTest {
     private DataSource dataSource;
 
     @Test
-    @Repeat(3)
+//    @Repeat(3)
+//    @Sql(statements = "DELETE FROM Application_Log")
     public void testJdbcTemplate() throws Exception {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
@@ -50,13 +51,13 @@ public class DatabasePopulateConfigurationTest {
         String result = jdbcTemplate.queryForObject(SELECT_ONE, parameters, String.class);
         assertThat(result, is("Log Message 1"));
 
-        List<String> msgs = jdbcTemplate.query(SELECT_ALL, (rs, rowNum) -> {
-            return rs.getString("message");
-        });
+        List<String> msgs = jdbcTemplate.query(SELECT_ALL, (rs, rowNum) -> rs.getString("message"));
 
         msgs.forEach(System.out::println);
 
         List<String> messages = jdbcTemplate.queryForList(SELECT_ALL, new MapSqlParameterSource(), String.class);
         messages.forEach(System.out::println);
+
+        assertThat(messages, hasSize(2));
     }
 }
