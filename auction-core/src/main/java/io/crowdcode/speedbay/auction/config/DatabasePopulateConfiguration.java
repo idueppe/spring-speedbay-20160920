@@ -1,7 +1,6 @@
 package io.crowdcode.speedbay.auction.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +18,10 @@ import static io.crowdcode.speedbay.common.AnsiColor.red;
 /**
  * @author Ingo Düppe (Crowdcode)
  */
+@Slf4j
 @Configuration
 @Import(DataSourceConfiguration.class)
 public class DatabasePopulateConfiguration {
-
-    private static final Logger log = LoggerFactory.getLogger(DatabasePopulateConfiguration.class);
 
 
     @Value("application_log_schema_${dbms-name:h2}.sql")

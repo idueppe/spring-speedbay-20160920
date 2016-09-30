@@ -1,14 +1,23 @@
 package io.crowdcode.speedbay.auction.config;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +33,9 @@ import static org.hamcrest.Matchers.is;
 @ContextConfiguration(classes = {DatabasePopulateConfiguration.class})
 public class DatabasePopulateConfigurationTest {
 
-    private static final String INSERT_ONE = "INSERT INTO Application_Log (id, message, createdAt, createdBy) VALUES (nextVal('LogSequence'), :message, :createdAt, :createdBy)";
+    private static final String INSERT_ONE =
+            "INSERT INTO Application_Log (id, message, createdAt, createdBy) " +
+            "VALUES (nextVal('LogSequence'), :message, :createdAt, :createdBy)";
     private static final String SELECT_ONE = "SELECT message FROM Application_Log WHERE id=:id";
     private static final String SELECT_ALL = "SELECT message FROM Application_Log";
 
@@ -32,8 +43,9 @@ public class DatabasePopulateConfigurationTest {
     private DataSource dataSource;
 
     @Test
-//    @Repeat(3)
+    @Repeat(3)
 //    @Sql(statements = "DELETE FROM Application_Log")
+    @Sql(scripts = "classpath:application_log_schema_h2.sql")
     public void testJdbcTemplate() throws Exception {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
@@ -52,12 +64,28 @@ public class DatabasePopulateConfigurationTest {
         assertThat(result, is("Log Message 1"));
 
         List<String> msgs = jdbcTemplate.query(SELECT_ALL, (rs, rowNum) -> rs.getString("message"));
-
         msgs.forEach(System.out::println);
+
+        List<Bean> beans = jdbcTemplate.query(SELECT_ALL,
+                (rs, rowNum) -> new Bean().setMessage(rs.getString("message")));
+        beans.forEach(System.out::println);
 
         List<String> messages = jdbcTemplate.queryForList(SELECT_ALL, new MapSqlParameterSource(), String.class);
         messages.forEach(System.out::println);
 
         assertThat(messages, hasSize(2));
+    }
+
+    @Getter @Setter @Accessors(chain = true) @ToString
+    public final class Bean {
+        private String message;
+    }
+
+    public final class BeanRowMapper implements RowMapper<Bean> {
+
+        @Override
+        public Bean mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return null;
+        }
     }
 }
