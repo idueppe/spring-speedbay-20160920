@@ -25,11 +25,16 @@ import static io.crowdcode.speedbay.common.AnsiColor.red;
                 "io.crowdcode.speedbay.common.inmemory" // Variant 1
         },
 //        basePackageClasses = {InMemoryStore.class}, // Variant 3
-        excludeFilters = @ComponentScan.Filter
-                (
-                        type = FilterType.REGEX,
-                        pattern = "io\\.crowdcode\\.speedbay\\.auction\\.config\\..*"
-                )
+excludeFilters = { @ComponentScan.Filter
+        (
+                type = FilterType.REGEX,
+                pattern = "io\\.crowdcode\\.speedbay\\.auction\\.config\\..*"
+        ),
+        @ComponentScan.Filter (
+                type = FilterType.REGEX,
+                pattern = ".*ApplicationLog.*"
+        )
+}
 )
 public class BusinessLogicAnnotationConfiguration {
 
