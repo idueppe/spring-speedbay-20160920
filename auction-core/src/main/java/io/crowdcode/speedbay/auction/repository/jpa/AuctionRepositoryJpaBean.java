@@ -33,7 +33,8 @@ public class AuctionRepositoryJpaBean implements AuctionRepository {
 
     @Override
     public List<Auction> findAll() {
-        TypedQuery<Auction> query = em.createQuery("SELECT a FROM Auction a ", Auction.class);
+        String ql = "SELECT a FROM Auction a JOIN FETCH a.bids";
+        TypedQuery<Auction> query = em.createQuery(ql, Auction.class);
         return query.getResultList();
     }
 
